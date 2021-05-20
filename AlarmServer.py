@@ -4,6 +4,7 @@
 import os, sys, struct, json
 import paho.mqtt.client as mqtt
 import yaml
+import logging
 from time import sleep
 from socket import *
 from datetime import *
@@ -13,10 +14,10 @@ server = socket(AF_INET, SOCK_STREAM)
 server.bind(("0.0.0.0", int(port)))
 # server.settimeout(0.5)
 server.listen(1)
-
+logging.basicConfig(level=logging.INFO)
 
 def on_connect(client, userdata, flags, rc):
-    print("Connected with result code "+str(rc))
+    logging.info("Connected with result code "+str(rc))
 
 with open('config.yaml', 'r') as file:
     settings = yaml.load(file, Loader=yaml.FullLoader)
@@ -29,7 +30,7 @@ mqtt_password = settings['MQTT_PASSWORD']
 client = mqtt.Client("cameras") 
 client.on_connect = on_connect
 client.username_pw_set(username=mqtt_username,password=mqtt_password)
-print("Connecting...")
+logging.info("Connecting...")
 client.connect(mqtt_address, mqtt_port)
 
 def GetIP(s):
@@ -46,10 +47,10 @@ while True:
         data = conn.recv(len_data)
         conn.close()
         reply = json.loads(data, encoding="utf8")
-        print(datetime.now().strftime("[%Y-%m-%d %H:%M:%S]>>>"))
-        print(head, version, session, sequence_number, msgid, len_data)
-        print(json.dumps(reply, indent=4, sort_keys=True))
-        print("<<<")
+        logging.info(datetime.now().strftime("[%Y-%m-%d %H:%M:%S]>>>"))
+        logging.info(head, version, session, sequence_number, msgid, len_data)
+        logging.info(json.dumps(reply, indent=4, sort_keys=True))
+        logging.info("<<<")
 
         client.publish("cameras",json.dumps(reply))  
 
