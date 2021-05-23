@@ -17,7 +17,7 @@ server.listen(1)
 logging.basicConfig(level=logging.INFO)
 
 def on_connect(client, userdata, flags, rc):
-    logging.info("Connected with result code "+str(rc))
+    logging.debug("Connected with result code "+str(rc))
 
 def on_publish(client,userdata,result):
     logging.info("Data published")
@@ -42,7 +42,6 @@ client.loop_start()
 def GetIP(s):
     return inet_ntoa(struct.pack("<I", int(s, 16)))
 
-
 while True:
     try:
         conn, addr = server.accept()
@@ -52,19 +51,17 @@ while True:
         sleep(0.1)  # Just for recive whole packet
         data = conn.recv(len_data)
         conn.close()
-        reply = data.decode('utf-8')
-        client.publish("cameras", reply)
         
-        #reply = json.loads(data)
-        #logging.info(datetime.now().strftime("[%Y-%m-%d %H:%M:%S]>>>"))
-        #logging.info(head, version, session, sequence_number, msgid, len_data)
-        #logging.info(json.dumps(reply, indent=4, sort_keys=True))
-        #logging.info("<<<")
+        jdata = json.loads(data.decode('utf-8'))
 
-        #client.publish("cameras",json.dumps(reply))  
+        device_name = jdata['SerialID']
+        mqtt_topic = 'cameras/' + device_name
+
+        client.publish(mqtt_topic,json.dumps(jdata))  
 
     except (KeyboardInterrupt, SystemExit):
         break
 
+client.loop_stop()
 server.close()
 sys.exit(1)
