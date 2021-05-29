@@ -31,7 +31,7 @@ mqtt_port = settings['MQTT_PORT']
 mqtt_username = settings['MQTT_USERNAME']
 mqtt_password = settings['MQTT_PASSWORD']
 
-client = mqtt.Client("cameras") 
+client = mqtt.Client("cameras_alarmserver") 
 client.on_connect = on_connect
 client.on_publish = on_publish
 client.username_pw_set(username=mqtt_username,password=mqtt_password)
